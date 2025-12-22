@@ -1,0 +1,6 @@
+; Conditional expressions with booleans
+
+let x = 10 in
+let is_zero = iszero (pred x) in
+let result = if is_zero then 999 else 42 in
+if iszero 0 then result else 1000

@@ -1,0 +1,7 @@
+; Basic arithmetic operations with integers
+; This example shows successor, predecessor, and zero checking
+
+let x = 5 in
+let y = succ x in
+let z = pred y in
+if iszero (pred x) then 100 else z

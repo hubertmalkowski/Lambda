@@ -1,0 +1,11 @@
+; Church numerals - encoding numbers as functions
+; Church numeral n = λf.λx. f(f(...f(x)...)) (n times)
+
+let succ_num = fun n -> succ n in
+let zero = fun f -> fun x -> x in
+let one = fun f -> fun x -> f x in
+let two = fun f -> fun x -> f (f x) in
+let three = fun f -> fun x -> f (f (f x)) in
+
+; Convert church numeral to integer by applying succ_num
+three succ_num 0

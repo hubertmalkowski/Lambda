@@ -1,0 +1,7 @@
+let succ_num = fun n -> succ n in
+let suc = fun n -> fun f -> fun x -> f (n f x) in 
+let two = fun f -> fun x -> f (f x) in 
+let three = suc two in 
+let add = fun m -> fun n -> m succ_num (n succ_num 0) in
+add two three
+
