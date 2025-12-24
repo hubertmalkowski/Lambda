@@ -1,5 +1,7 @@
 open Ast
 
+
+
 (* EVALUATE BY VALUE *)
 type value_cbv =
   | VInt of int
@@ -22,7 +24,7 @@ let rec strictEval env = function
         | Var x -> (match List.assoc_opt x env with
             | Some x -> Ok x
             | None -> Error "Not found")
-        | Lambda (param, body) -> Ok (VClosure (param, body, env))
+        | Lambda (param, _, body) -> Ok (VClosure (param, body, env))
         | App (fn, arg) -> (match (strictEval env fn) with
                 | Ok VClosure (param, body, env') -> 
                     (strictEval env arg) 
@@ -45,19 +47,16 @@ let rec strictEval env = function
                         | Ok _ -> Error "not an int"
                         | Error x -> Error x
             )
-
         | IsZero a -> (match strictEval env a  with
                         | Ok VInt a -> Ok (VBool (a == 0))
                         | Ok _ -> Error "not an int"
                         | Error x -> Error x
             )
-
         | If (cond, yes, no) -> strictEval env cond 
                 >>= (function
                 | VBool a -> if a then strictEval env yes else strictEval env no
                 | _ -> Error "Not a bool"
         )
-
 
 type value_cbn = 
   | VInt of int
@@ -65,8 +64,6 @@ type value_cbn =
   | VClosure of string * Ast.expr * env_cbn
   | VThunk of expr *  env_cbn * value_cbn option ref
   and env_cbn = (string * value_cbn) list
-
-
 
 let string_of_cbn = function
     | VInt a ->  string_of_int a
@@ -87,7 +84,7 @@ let rec lazyEval env =
         | Some el -> Ok el
         | None -> Error "not found" 
     )
-    | Lambda (param, expr) -> Ok (VClosure (param, expr, env))
+    | Lambda (param, _, expr) -> Ok (VClosure (param, expr, env))
     | App (lamb, arg_expr) ->     
         let* closure = lazyEval env lamb in
         (match closure with 
@@ -113,8 +110,7 @@ let rec lazyEval env =
     | IsZero a -> (match lazyEval env a  with
                     | Ok VInt a -> Ok (VBool (a == 0))
                     | Ok _ -> Error "not an int"
-                    | Error x -> Error x
-        )
+                    | Error x -> Error x)
 
     | If (cond, yes, no) -> lazyEval env cond 
                 >>= (function
@@ -128,3 +124,6 @@ and evalThunk (expr, thunk_env, cache) = match !cache with
                 cache := Some v; 
                 Ok v
             | el -> el)
+
+
+

@@ -1,6 +1,6 @@
 (library
  (name lambda)
- (modules ast parser lexer eval))
+ (modules ast parser lexer eval checker))
 
 (menhir
   (modules parser))

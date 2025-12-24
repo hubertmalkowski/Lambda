@@ -5,7 +5,7 @@ open Ast
 %token <string> ID
 %token <int> INT
 %token LPAREN RPAREN
-%token FUN ARROW EQUAL LET IN SUCC PRED
+%token FUN ARROW EQUAL LET IN SUCC PRED COLON
 %token TRUE FALSE ISZERO IF THEN ELSE
 %token EOF
 
@@ -20,8 +20,8 @@ prog:
 expr:
   | simple_expr { $1 }
   | app_expr { $1 }
-  | FUN x = ID ARROW body = expr
-      { Lambda (x, body) }
+  | FUN x = ID COLON t = typ_signature ARROW body = expr
+      { Lambda (x, t, body) }
   | LET x = ID EQUAL e1 = expr IN e2 = expr
       { Let (x, e1, e2) }
   | IF e1 = expr THEN e2 = expr ELSE e3 = expr
@@ -33,6 +33,13 @@ expr:
   | ISZERO e = simple_expr
       { IsZero e }
   ;
+
+typ_signature:
+    | LPAREN a = typ_signature ARROW b = typ_signature RPAREN
+        { TSArrow (a, b) }
+    | a = ID
+        { TS a }
+
 
 app_expr:
   | simple_expr simple_expr

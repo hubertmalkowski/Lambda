@@ -2,11 +2,11 @@
 ; add m n = m succ_num (n succ_num 0)
 ; This applies successor m times to (n as integer)
 
-let succ_num = fun n -> succ n in
-let suc = fun n -> fun f -> fun x -> f (n f x) in
-let two = fun f -> fun x -> f (f x) in
+let succ_num = fun n : Int -> succ n in
+let suc = fun n : ((Int -> Int) -> (Int -> Int)) -> fun f : (Int -> Int) -> fun x : Int -> f (n f x) in
+let two = fun f : (Int -> Int) -> fun x : Int -> f (f x) in
 let three = suc two in
-let add = fun m -> fun n -> m succ_num (n succ_num 0) in
+let add = fun m : ((Int -> Int) -> (Int -> Int)) -> fun n : ((Int -> Int) -> (Int -> Int)) -> m succ_num (n succ_num 0) in
 
 ; 2 + 3 = 5
 add two three
