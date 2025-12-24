@@ -62,5 +62,3 @@ and assert_is_bool ctx expr =
     match typ with
     | TBool -> Ok TBool
     | _ -> Error "Not a bool"
-
-            

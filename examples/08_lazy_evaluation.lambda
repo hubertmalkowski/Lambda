@@ -3,7 +3,7 @@
 ; In strict mode, both branches are evaluated
 ; In lazy mode, only the taken branch is evaluated
 
-let expensive_computation = fun x : Int -> succ (succ (succ x)) in
+let expensive_computation (x : Int) = succ (succ (succ x)) in
 let true_branch = expensive_computation 100 in
 let false_branch = expensive_computation 200 in
 

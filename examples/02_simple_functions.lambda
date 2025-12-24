@@ -1,7 +1,7 @@
 ; Simple function application
 ; Identity function and constant function
 
-let id = fun x : Int -> x in
-let const = fun x : Int -> fun y : Int -> x in
+let id (x : Int) = x in
+let const (x : Int) (y : Int) = x in
 let five = id 5 in
 const five 999

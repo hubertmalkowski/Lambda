@@ -20,10 +20,11 @@ prog:
 expr:
   | simple_expr { $1 }
   | app_expr { $1 }
-  | FUN x = ID COLON t = typ_signature ARROW body = expr
-      { Lambda (x, t, body) }
-  | LET x = ID EQUAL e1 = expr IN e2 = expr
-      { Let (x, e1, e2) }
+  | FUN params = nonempty_list(param) ARROW body = expr
+      { List.fold_right (fun (x, t) acc -> Lambda (x, t, acc)) params body }
+  | LET x = ID params = list(param) EQUAL e1 = expr IN e2 = expr
+      { let fn = List.fold_right (fun (p, t) acc -> Lambda (p, t, acc)) params e1 in
+        Let (x, fn, e2) }
   | IF e1 = expr THEN e2 = expr ELSE e3 = expr
       { If (e1, e2, e3) }
   | SUCC e = simple_expr
@@ -32,6 +33,11 @@ expr:
       { Pred e }
   | ISZERO e = simple_expr
       { IsZero e }
+  ;
+
+param:
+  | LPAREN x = ID COLON t = typ_signature RPAREN
+      { (x, t) }
   ;
 
 typ_signature:

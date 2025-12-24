@@ -54,12 +54,20 @@ The lambda calculus implementation supports:
 
 - **Integers**: `0`, `1`, `42`, etc.
 - **Booleans**: `true`, `false`
-- **Lambda expressions**: `fun x -> expr`
+- **Lambda expressions**: 
+  - Single parameter: `fun (x : Int) -> expr`
+  - Multiple parameters: `fun (x : Int) (y : Int) -> expr`
+- **Function definitions (syntax sugar)**:
+  - `let f (x : Int) = expr in body`
+  - `let f (x : Int) (y : Int) = expr in body`
 - **Function application**: `f x`
 - **Let bindings**: `let x = value in body`
 - **Conditionals**: `if cond then expr1 else expr2`
 - **Arithmetic**: `succ n`, `pred n`
 - **Predicates**: `iszero n`
+- **Type annotations**: Required on all function parameters
+  - Simple types: `Int`, `Bool`
+  - Function types: `(Int -> Int)`, `((Int -> Int) -> Int)`
 
 ## Evaluation Strategies
 
