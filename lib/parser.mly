@@ -4,7 +4,7 @@ open Ast
 
 %token <string> ID
 %token <int> INT
-%token LPAREN RPAREN
+%token LPAREN RPAREN LBRACE RBRACE COMMA DOT
 %token FUN ARROW EQUAL LET IN SUCC PRED COLON
 %token TRUE FALSE ISZERO IF THEN ELSE
 %token EOF
@@ -33,16 +33,21 @@ expr:
       { Pred e }
   | ISZERO e = simple_expr
       { IsZero e }
+  | LBRACE exprs = separated_list(COMMA, expr) RBRACE
+      { Tuple exprs }
+
   ;
 
 param:
   | LPAREN x = ID COLON t = typ_signature RPAREN
-      { (x, t) }
+      { (x, Some t) }
   ;
 
 typ_signature:
     | LPAREN a = typ_signature ARROW b = typ_signature RPAREN
         { TSArrow (a, b) }
+    | LBRACE sigs = separated_nonempty_list(COMMA, typ_signature) RBRACE
+      { TSTuple sigs }
     | a = ID
         { TS a }
 
@@ -60,4 +65,6 @@ simple_expr:
   | TRUE { Bool true }
   | FALSE { Bool false }
   | LPAREN e = expr RPAREN { e }
+  | simple_expr DOT n = INT
+      { TupleProj ($1, n) }
   ;

@@ -14,9 +14,13 @@ rule token = parse
   | white       { token lexbuf }
   | ';'         { comment lexbuf }
   | '('         { LPAREN }
-  | ':'         { COLON }
   | ')'         { RPAREN }
+  | '{'         { LBRACE }
+  | '}'         { RBRACE }
+  | '.'         { DOT }
+  | ':'         { COLON }
   | "->"        { ARROW }
+  | ','         { COMMA }
   | '='         { EQUAL }
   | "fun"       { FUN }
   | "let"       { LET }

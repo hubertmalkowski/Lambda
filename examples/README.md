@@ -48,6 +48,22 @@ Higher-order functions including function composition.
 Demonstrates the difference between strict and lazy evaluation strategies.
 - **Expected output**: `103` (both modes, but lazy only computes the taken branch)
 
+### 09_syntax_sugar_demo.lambda
+Demonstrates the syntax sugar for multi-parameter functions.
+- **Expected output**: `6`
+
+### 10_tuples.lambda
+Introduction to tuples - grouping multiple values together.
+- **Expected output**: `6`
+
+### 11_tuple_functions.lambda
+Functions that work with tuples: fst, snd, swap, and tuple construction.
+- **Expected output**: `7`
+
+### 12_nested_tuples.lambda
+Nested tuples and accessing elements with chained projections.
+- **Expected output**: `2`
+
 ## Language Features
 
 The lambda calculus implementation supports:
@@ -65,9 +81,14 @@ The lambda calculus implementation supports:
 - **Conditionals**: `if cond then expr1 else expr2`
 - **Arithmetic**: `succ n`, `pred n`
 - **Predicates**: `iszero n`
+- **Tuples**: 
+  - Creation: `{expr1, expr2, ...}`
+  - Projection: `tuple.0`, `tuple.1`, etc. (0-indexed)
+  - Nested: `{1, {2, 3}}.1.0` accesses the nested 2
 - **Type annotations**: Required on all function parameters
   - Simple types: `Int`, `Bool`
   - Function types: `(Int -> Int)`, `((Int -> Int) -> Int)`
+  - Tuple types: `{Int, Int}`, `{Bool, Int, Int}`
 
 ## Evaluation Strategies
 

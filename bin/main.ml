@@ -27,7 +27,7 @@ let () =
   
   let use_lazy = ref false in
   let filename = ref "" in
-  
+
   for i = 1 to Array.length Sys.argv - 1 do
     match Sys.argv.(i) with
     | "--lazy" -> use_lazy := true
@@ -41,8 +41,8 @@ let () =
   
   let ast = parse_file !filename in
 
-  match Lambda.Checker.typecheck [] ast with 
-  | Error msg -> Printf.printf "Type error: %s" msg; exit 1;
+  match Lambda.Checker.infer ast with 
+  | Error msg -> Printf.printf "Type error: %s\n" msg; exit 1;
   | Ok _ -> ();  
   
   if !use_lazy then begin

@@ -1,0 +1,22 @@
+; Nested tuples and triples
+
+; A triple (3-tuple)
+let triple = {1, 2, 3} in
+
+; A nested tuple: pair of (int, pair)
+let nested = {5, {10, 15}} in
+
+; Access nested tuple elements
+let outer_first = nested.0 in           ; 5
+let inner_tuple = nested.1 in           ; {10, 15}
+let inner_first = inner_tuple.0 in      ; 10
+let inner_second = inner_tuple.1 in     ; 15
+
+; Or access directly with chained projections
+let direct = nested.1.1 in              ; 15
+
+; Compute: 5 + 15 = 20
+let sum = succ (succ (succ (succ (succ (succ (succ (succ (succ (succ (succ (succ (succ (succ (succ (succ (succ (succ (succ (succ outer_first))))))))))))))))))) in
+
+; Return the triple's second element
+triple.1
