@@ -41,6 +41,8 @@ expr:
 param:
   | LPAREN x = ID COLON t = typ_signature RPAREN
       { (x, Some t) }
+  | x = ID
+      { (x, None) }
   ;
 
 typ_signature:

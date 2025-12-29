@@ -1,7 +1,7 @@
 ; Church numerals - encoding numbers as functions
 ; Church numeral n = λf.λx. f(f(...f(x)...)) (n times)
 
-let succ_num (n : Int) = succ n in
+let succ_num n = succ n in
 let zero (f : (Int -> Int)) (x : Int) = x in
 let one (f : (Int -> Int)) (x : Int) = f x in
 let two (f : (Int -> Int)) (x : Int) = f (f x) in

@@ -41,16 +41,16 @@ let () =
   
   let ast = parse_file !filename in
 
-  match Lambda.Checker.infer ast with 
+  match Lambda.Infer.typecheck ast with 
   | Error msg -> Printf.printf "Type error: %s\n" msg; exit 1;
-  | Ok _ -> ();  
+  | Ok t -> Printf.printf "%s" (Lambda.Infer.string_of_typ t);  
   
   if !use_lazy then begin
     let result = Lambda.Eval.lazyEval [] ast in
-    Printf.printf "Result (lazy): %s \n" 
+    Printf.printf " (lazy)\n%s \n" 
       (Lambda.Eval.string_of_cbn_result result)
   end else begin
     let result = Lambda.Eval.strictEval [] ast in
-    Printf.printf "Result (strict): %s \n" 
+    Printf.printf "\n%s \n" 
       (Lambda.Eval.string_of_cbv_result result)
   end
