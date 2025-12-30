@@ -1,5 +1,5 @@
 open Ast
-open Utils
+open Lambda_utils.Utils
 
 type typ = 
     | TInt

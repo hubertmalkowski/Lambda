@@ -24,3 +24,14 @@ let result_all results =
       | _, Error e -> Error e)
       results
       (Ok [])
+
+
+let rec repl eval =
+  print_string "> ";
+  flush stdout;
+  try
+    let input = read_line () in
+    let result = eval input in
+    print_endline result;
+    repl eval
+  with End_of_file -> print_endline "Bye!"

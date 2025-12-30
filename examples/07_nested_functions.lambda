@@ -1,9 +1,0 @@
-; Nested function definitions and higher-order functions
-
-let compose (f : (Int -> Int)) (g : (Int -> Int)) (x : Int) = f (g x) in
-let inc (n : Int) = succ n in
-let dec (n : Int) = pred n in
-let inc_twice = compose inc inc in
-
-; Apply increment twice to 5: 5 + 1 + 1 = 7
-inc_twice 5

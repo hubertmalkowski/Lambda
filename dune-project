@@ -1,6 +1,6 @@
 (lang dune 3.18)
 
-(name lambda)
+(name lambda-monorepo)
 
 (generate_opam_files true)
 
@@ -15,13 +15,22 @@
 
 (documentation https://url/to/documentation)
 
-(package
- (name lambda)
- (synopsis "A short synopsis")
- (description "A longer description")
- (depends ocaml)
- (tags
-  ("add topics" "to describe" your project)))
-
 (using menhir 2.0)
-; See the complete stanza docs at https://dune.readthedocs.io/en/stable/reference/dune-project/index.html
+
+(package
+ (name lambda-utils)
+ (synopsis "Utility functions for lambda calculus implementations")
+ (description "Shared utilities including Result monad helpers")
+ (depends
+  (ocaml (>= 4.14))
+  dune))
+
+(package
+ (name lambda-let-poly)
+ (synopsis "Let-polymorphic lambda calculus with Hindley-Milner type inference")
+ (description "Complete implementation of lambda calculus with let-polymorphism")
+ (depends
+  (ocaml (>= 4.14))
+  lambda-utils
+  menhir
+  dune))

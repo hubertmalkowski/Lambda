@@ -1,8 +1,0 @@
-(library
- (name lambda)
- (modules ast parser lexer eval utils infer))
-
-(menhir
- (modules parser))
-
-(ocamllex lexer)

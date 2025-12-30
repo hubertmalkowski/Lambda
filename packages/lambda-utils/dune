@@ -1,0 +1,4 @@
+(library
+ (name lambda_utils)
+ (public_name lambda-utils)
+ (modules utils))
