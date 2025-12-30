@@ -1,0 +1,31 @@
+
+** Conflict (shift/reduce) in state 55.
+** Tokens involved: LPAREN LBRACKET
+** The following explanations concentrate on token LPAREN.
+** This state is reached from prog after reading:
+
+ID
+
+** The derivations that appear below have the following common factor:
+** (The question mark symbol (?) represents the spot where the derivations begin to differ.)
+
+prog 
+(?)
+
+** In state 55, looking ahead at LPAREN, shifting is permitted
+** because of the following sub-derivation:
+
+def EOF 
+ID nonempty_list(param) EQUAL expr 
+   param 
+   . LPAREN ID COLON typ_signature RPAREN 
+
+** In state 55, looking ahead at LPAREN, reducing production
+** simple_expr -> ID
+** is permitted because of the following sub-derivation:
+
+expr EOF 
+app_expr 
+app_expr simple_expr // lookahead token appears because simple_expr can begin with LPAREN
+simple_expr // lookahead token is inherited
+ID . 

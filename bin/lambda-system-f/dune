@@ -1,0 +1,6 @@
+(executable
+ (name main)
+ (public_name lambda-system-f-bin)
+ (package lambda-system-f)
+ (libraries lambda-system-f lambda-utils)
+ (modules main))

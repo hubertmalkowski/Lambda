@@ -1,0 +1,10 @@
+(library
+ (name lambda_system_f)
+ (public_name lambda-system-f)
+ (libraries lambda-utils)
+ (modules syntax parser typecheck lexer))
+
+(menhir
+ (modules parser))
+
+(ocamllex lexer)
