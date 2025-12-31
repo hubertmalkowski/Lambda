@@ -21,6 +21,7 @@
 %token TRUE FALSE ISZERO IF THEN ELSE
 %token EOF
 
+%right ARROW
 
 %start <Syntax.program> prog
 
@@ -28,11 +29,11 @@
 
 prog:
         | e = expr EOF { PExpr e }
-        | d = def EOF { PDef d }
+        | LET d = def EOF { PDef d }
 ;
 
 def: 
-        | LET x = ID params = list(param) EQUAL e1 = expr
+        | x = ID params = list(param) EQUAL e1 = expr
             { let fn = List.fold_right param_fold params e1 in (x, fn) }
 ;
 
@@ -65,10 +66,12 @@ param:
 
 
 typ_signature:
-    | LPAREN a = typ_signature ARROW b = typ_signature RPAREN
+    | a = typ_signature ARROW b = typ_signature
         { TSArrow (a, b) }
     | a = ID
         { TS a }
+    | LPAREN tt = typ_signature RPAREN
+        { tt }
 ;
 
 
