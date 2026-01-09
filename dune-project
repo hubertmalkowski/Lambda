@@ -23,16 +23,6 @@
   (ocaml (>= 4.14))
   dune))
 
-(package
- (name lambda-let-poly)
- (synopsis "Let-polymorphic lambda calculus with Hindley-Milner type inference")
- (description "Complete implementation of lambda calculus with let-polymorphism")
- (depends
-  (ocaml (>= 4.14))
-  lambda-utils
-  menhir
-  dune))
-
 
 (package
  (name lambda-system-f)
