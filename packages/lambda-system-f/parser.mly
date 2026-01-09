@@ -65,6 +65,7 @@ param:
 ;
 
 
+
 typ_signature:
     | a = typ_signature ARROW b = typ_signature
         { TSArrow (a, b) }

@@ -33,9 +33,6 @@ expr:
       { Pred e }
   | ISZERO e = simple_expr
       { IsZero e }
-  | LBRACE exprs = separated_list(COMMA, expr) RBRACE
-      { Tuple exprs }
-
   ;
 
 param:

@@ -1,0 +1,12 @@
+(library
+ (name lambda_poly)
+ (public_name lambda-poly)
+ (libraries lambda-utils)
+ (modules syntax parser lexer infer))
+
+(menhir
+ (modules parser)
+ (flags -v)
+ (explain true))
+
+(ocamllex lexer)
