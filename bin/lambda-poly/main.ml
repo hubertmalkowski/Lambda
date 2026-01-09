@@ -19,9 +19,7 @@ let format_parse_error ?message ~code ~line ~column ~error_type () =
       header
 
 let repl () =
-  let env : Infer.ctx ref =
-    ref Infer.{ vars = []; exceptions = []; typs = [] }
-  in
+  let env : Infer.ctx ref = ref Infer.{ vars = []; typs = [] } in
   let eval code =
     let lexbuf = Lexing.from_string code in
     try
