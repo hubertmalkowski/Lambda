@@ -93,7 +93,6 @@ app_expr:
 
 loc_simple_expr:
   | e = located(simple_expr) { e }
-    
 
 simple_expr:
   | x = ID { Var x }

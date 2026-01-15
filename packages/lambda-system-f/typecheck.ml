@@ -8,7 +8,7 @@ type typ =
   | TArrow of typ * typ
   | TTypeArrow of string * typ
 
-and ctx = (string * typ) list
+and ctx = { vars : (string * typ) list; tvars : string list }
 
 let rec string_of_typ = function
   | TVar a -> a
@@ -25,71 +25,110 @@ let rec typ_of_typ_sig = function
   | TS "Int" -> TInt
   | TS x -> TVar x
 
-let validate_type tvars tsig =
+let validate_type tvars tsig loc =
   let tt = typ_of_typ_sig tsig in
   match tt with
   | TVar x ->
       if List.mem x tvars then Ok (TVar x)
-      else Error ("Not found type variable" ^ x)
+      else Error (loc, "Not found type variable " ^ x)
   | others -> Ok others
 
-let rec substitute (var, t) = function
-  | TVar n -> if n = var then t else TVar n
-  | TArrow (tfrom, tto) ->
-      TArrow (substitute (var, t) tfrom, substitute (var, t) tto)
-  | TBool -> TBool
+let rec substitute tvar tto = function
+  | TVar a -> if tvar = a then tto else TVar a
   | TInt -> TInt
-  (* Support shadowing  *)
-  | TTypeArrow (param, ret) ->
-      if param = var then TTypeArrow (param, ret)
-      else TTypeArrow (param, substitute (var, t) ret)
+  | TBool -> TBool
+  | TTypeArrow (tv, body) -> TTypeArrow (tv, substitute tvar tto body)
+  | TArrow (tfrom, atto) ->
+      TArrow (substitute tvar tto tfrom, substitute tvar tto atto)
 
-let rec typecheck_expr tvars ctx e = match e.item with
-  | Var n -> (
-      match List.assoc_opt n ctx with
+let rec typecheck_expr ctx expr =
+  match expr.item with
+  | Var s -> (
+      match List.assoc_opt s ctx.vars with
       | Some t -> Ok t
-      | None -> Error ("Unbound variable " ^ n))
-  | Lambda (paramName, typSig, body) ->
-      let* tparam = validate_type tvars typSig in
-      let* tbody = typecheck_expr tvars ((paramName, tparam) :: ctx) body in
+      | None -> Error (expr.loc, "Variable " ^ s ^ " wasn't found"))
+  | Lambda (param, tsig, body) ->
+      let* tparam = validate_type ctx.tvars tsig expr.loc in
+      let* tbody =
+        typecheck_expr { ctx with vars = (param, tparam) :: ctx.vars } body
+      in
       Ok (TArrow (tparam, tbody))
-  | TypeLambda (n, ex) ->
-      let* body = typecheck_expr (n :: tvars) ctx ex in
-      Ok (TTypeArrow (n, body))
-  | App (fn, arg) -> (
-      let* tfn = typecheck_expr tvars ctx fn in
-      let* targ = typecheck_expr tvars ctx arg in
-      match tfn with
-      | TArrow (tfrom, tto) ->
-          if targ = tfrom then Ok tto else Error "Wrong argument tyupe"
-      | _ -> Error "Not a function")
-  | TApp (expr, typ_sig) -> (
-      let* ttyp = validate_type tvars typ_sig in
-      let* texpr = typecheck_expr tvars ctx expr in
-      match texpr with
-      | TTypeArrow (param, ret) -> Ok (substitute (param, ttyp) ret)
-      | _ -> Error "Not a type arrow")
-  | Let (name, value, bod) ->
-      let* tval = typecheck_expr tvars ctx value in
-      typecheck_expr tvars ((name, tval) :: ctx) bod
+  | App (lambda, param) -> (
+      let* tlambda = typecheck_expr ctx lambda in
+      let* tparam = typecheck_expr ctx param in
+      match tlambda with
+      | TArrow (from, tto) ->
+          if tparam = from then Ok tto
+          else
+            Error
+              ( param.loc,
+                "Param of type " ^ string_of_typ tparam
+                ^ " is not compatible with type " ^ string_of_typ from
+                ^ " in function of type " ^ string_of_typ tlambda )
+      | e ->
+          Error
+            ( lambda.loc,
+              "Term of type " ^ string_of_typ e ^ " is not a function" ))
+  | Let (name, value, body) ->
+      let* tvalue = typecheck_expr ctx value in
+      typecheck_expr { ctx with vars = (name, tvalue) :: ctx.vars } body
   | Int _ -> Ok TInt
   | Bool _ -> Ok TBool
-  | Succ ex | Pred ex -> (
-      let* texpr = typecheck_expr tvars ctx ex in
-      match texpr with TInt -> Ok TInt | _ -> Error "Not an int")
-  | IsZero ex -> (
-      let* texpr = typecheck_expr tvars ctx ex in
-      match texpr with TInt -> Ok TBool | _ -> Error "Not an int")
-  | If (cond, yes, no) ->
-      let* tcond = typecheck_expr tvars ctx cond in
-      let* _ =
-        if tcond = TBool then Ok () else Error "Condition must be of type bool"
-      in
-      let* tyes = typecheck_expr tvars ctx yes in
-      let* tno = typecheck_expr tvars ctx no in
-      if tyes = tno then Ok tyes else Error "BRANCHES MUST be the same type"
+  | Succ a | Pred a -> (
+      let* t_a = typecheck_expr ctx a in
+      match t_a with
+      | TInt -> Ok TInt
+      | e ->
+          Error
+            ( a.loc,
+              "Expected: " ^ string_of_typ TInt ^ " Got: " ^ string_of_typ e ))
+  | IsZero a -> (
+      let* t_a = typecheck_expr ctx a in
+      match t_a with
+      | TInt -> Ok TBool
+      | e ->
+          Error
+            ( a.loc,
+              "Expected: " ^ string_of_typ TInt ^ " Got: " ^ string_of_typ e ))
+  | If (cond, yes, no) -> (
+      let* tcond = typecheck_expr ctx cond in
+      let* tyes = typecheck_expr ctx yes in
+      let* tno = typecheck_expr ctx no in
+      match tcond with
+      | TBool ->
+          if tyes = tno then Ok tyes
+          else
+            Error
+              ( expr.loc,
+                "Branches do not match Expected. Yes type branch: "
+                ^ string_of_typ tyes ^ ", No type branch: " ^ string_of_typ tno
+              )
+      | e ->
+          Error
+            ( cond.loc,
+              "Expected: " ^ string_of_typ TBool ^ " Got: " ^ string_of_typ e ))
+  | TypeLambda (typename, body) ->
+      if List.mem typename ctx.tvars then
+        Error (expr.loc, "Typevar " ^ typename ^ " already exists.")
+      else
+        let* tbody =
+          typecheck_expr { ctx with tvars = typename :: ctx.tvars } body
+        in
+        Ok (TTypeArrow (typename, tbody))
+  | TApp (type_lambda, type_param) -> (
+      let* tlambda = typecheck_expr ctx type_lambda in
+      let* tparam = validate_type ctx.tvars type_param expr.loc in
+      match tlambda with
+      | TTypeArrow (tvar, tbody) -> Ok (substitute tvar tparam tbody)
+      | e ->
+          Error (type_lambda.loc, string_of_typ e ^ " is not a type abstraction")
+      )
 
-let typecheck_program ctx = function
-  | PExpr e -> Result.map (fun x -> (x, ctx)) (typecheck_expr [] ctx e)
-  | PDef (n, e) ->
-      Result.map (fun x -> (x, (n, x) :: ctx)) (typecheck_expr [] ctx e)
+let typecheckRepl ctx pl =
+  match pl with
+  | PExpr e ->
+      let* res = typecheck_expr { vars = ctx; tvars = [] } e in
+      Ok (res, ctx)
+  | PDef (name, value) ->
+      let* tvalue = typecheck_expr { vars = ctx; tvars = [] } value in
+      Ok (tvalue, (name, tvalue) :: ctx)
