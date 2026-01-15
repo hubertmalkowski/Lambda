@@ -1,15 +1,13 @@
 %{
    open Syntax
 
-
    type param_helper =
                 | TypeParam of string
                 | Param of string * typ_sig
 
-   let param_fold p acc = match p with
-                | Param (n, t) -> Lambda (n, t, acc)
-                | TypeParam n -> TypeLambda (n, acc)
-
+   let param_fold p acc = (match p with
+                | Param (n, t) -> { item = Lambda (n, t, acc); loc = acc.loc }
+                | TypeParam n -> { item = TypeLambda (n, acc); loc = acc.loc })
 
 %}
 
@@ -27,33 +25,39 @@
 
 %%
 
+%inline located(X):
+  | x = X { { item = x; loc = $loc } }
+
 prog:
-        | e = expr EOF { PExpr e }
+        | e = loc_expr EOF { PExpr e }
         | LET d = def EOF { PDef d }
 ;
 
 def: 
-        | x = ID params = list(param) EQUAL e1 = expr
+        | x = ID params = list(param) EQUAL e1 = loc_expr
             { let fn = List.fold_right param_fold params e1 in (x, fn) }
 ;
 
 
+loc_expr:
+  | e = located(expr) { e }
+
 expr:
   | simple_expr { $1 }
   | app_expr { $1 }
-  | FUN params = nonempty_list(param) ARROW body = expr
-      { List.fold_right param_fold params body }
-  | LET x = ID params = list(param) EQUAL e1 = expr IN e2 = expr
-      { let fn = List.fold_right param_fold params e1 in
+  | FUN params = nonempty_list(param) ARROW body = loc_expr
+      { (List.fold_right param_fold params (body)).item }
+  | LET x = ID params = list(param) EQUAL e1 = loc_expr IN e2 = loc_expr
+      { let fn = List.fold_right param_fold params (e1) in
         Let (x, fn, e2) }
-  | IF e1 = expr THEN e2 = expr ELSE e3 = expr
+  | IF e1 = loc_expr THEN e2 = loc_expr ELSE e3 = loc_expr
       { If (e1, e2, e3) }
-  | SUCC e = simple_expr
-      { Succ e }
-  | PRED e = simple_expr
-      { Pred e }
-  | ISZERO e = simple_expr
-      { IsZero e }
+  | SUCC e = loc_simple_expr
+      { Succ (e) }
+  | PRED e = loc_simple_expr
+      { Pred (e) }
+  | ISZERO e = loc_simple_expr
+      { IsZero (e) }
 ;
 
 
@@ -77,20 +81,24 @@ typ_signature:
 
 
 app_expr:
-  | simple_expr LBRACKET typ_signature RBRACKET
-      { TApp ($1, $3) }
-  | app_expr LBRACKET typ_signature RBRACKET
-      { TApp ($1, $3) }
-  | simple_expr simple_expr
-      { App ($1, $2) }
-  | app_expr simple_expr
-      { App ($1, $2) }
+  | e = simple_expr LBRACKET t = typ_signature RBRACKET
+      { TApp ({ item = e; loc = $loc(e) }, t) }
+  | e = app_expr LBRACKET t = typ_signature RBRACKET
+      { TApp ({ item = e; loc = $loc(e) }, t) }
+  | e1 = simple_expr e2 = simple_expr
+      { App ({ item = e1; loc = $loc(e1) }, { item = e2; loc = $loc(e2) }) }
+  | e1 = app_expr e2 = simple_expr
+      { App ({ item = e1; loc = $loc(e1) }, { item = e2; loc = $loc(e2) }) }
 ;
+
+loc_simple_expr:
+  | e = located(simple_expr) { e }
+    
 
 simple_expr:
   | x = ID { Var x }
   | n = INT { Int n }
   | TRUE { Bool true }
   | FALSE { Bool false }
-  | LPAREN e = expr RPAREN { e }
+  | LPAREN e = loc_expr RPAREN { e.item }
 ;

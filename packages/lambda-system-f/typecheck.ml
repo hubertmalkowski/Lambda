@@ -44,7 +44,7 @@ let rec substitute (var, t) = function
       if param = var then TTypeArrow (param, ret)
       else TTypeArrow (param, substitute (var, t) ret)
 
-let rec typecheck_expr tvars ctx = function
+let rec typecheck_expr tvars ctx e = match e.item with
   | Var n -> (
       match List.assoc_opt n ctx with
       | Some t -> Ok t
