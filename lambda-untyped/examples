@@ -1,0 +1,14 @@
+incr := λx.succ x
+
+toInt := λf. f (λx. succ x) x
+
+zero := λf.λx.x
+one := λf.λx.f x
+two := λf.λx.f (f x)
+three := λf.λx.f (f (f x))
+
+plus := λm.λn.λf.λx.m f (n f x)
+
+
+fTrue := λp.λq. p
+fFalse := λp.λq. q
