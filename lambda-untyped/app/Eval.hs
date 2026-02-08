@@ -1,22 +1,10 @@
 module Eval (evalTerm, evalProgram, Env) where
 
 import Data.Map (Map, insert, lookup)
-import Data.Void
 import Parser (Program (..), Term (..))
 import Prelude hiding (lookup)
 
 data EValue = EArrow String Term Env | EInt Integer | EBool Bool
-
-prove :: a -> (b -> a)
-prove a b = a
-
-type Not a = a -> Void
-
-prove3 :: (a, Not a) -> Void
-prove3 (valA, funcNotA) = funcNotA valA
-
-prove2 :: (b -> c) -> (a -> b) -> (a -> c)
-prove2 f g = f . g
 
 instance Show EValue where
   show (EArrow {}) = "<fn>"
