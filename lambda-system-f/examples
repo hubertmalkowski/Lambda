@@ -1,0 +1,10 @@
+incr := λx:Int.succ x
+
+fTrue := ΛA.ΛB.λp:A.λq:B. p
+fFalse := ΛA.ΛB.λp:A.λq:B. q
+
+-- Proof for A -> (B -> A)
+ΛA. ΛB. λp:A. λq:B. p
+
+--Proof for (A -> B) -> (B -> C) -> (A -> C)
+ΛA. ΛB. ΛC. λab:(A -> B). λbc:(B -> C). λa:A. bc (ab a)   
